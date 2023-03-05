@@ -9,26 +9,17 @@ use core::panic::PanicInfo;
 
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
-    println!("hiii :3");
-
-    #[cfg(test)]
     test_main();
 
     loop {}
 }
 
-#[cfg(not(test))]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
-    println!("{info}");
-    loop {}
+    beeos::test_panic_handler(info)
 }
 
-#[cfg(test)]
-#[panic_handler]
-fn panic(info: &PanicInfo) -> ! {
-    use beeos::test_panic_handler;
-
-    test_panic_handler(info);
-    loop {}
+#[test_case]
+fn test_println() {
+    println!("test_println output");
 }

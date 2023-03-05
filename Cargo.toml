@@ -1,13 +1,21 @@
 [package]
-name = "os"
+name = "beeos"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [package.metadata.bootimage]
-test-args = ["-device", "isa-debug-exit,iobase=0xf4,iosize=0x04"]
+test-args = [
+    "-device", "isa-debug-exit,iobase=0xf4,iosize=0x04",
+    "-serial", "stdio",
+    "-display", "none"
+]
 test-success-exit-code = 33          # (0x10 << 1) | 1
+
+[[test]]
+name = "should_panic"
+harness = false
 
 [dependencies]
 bootloader = "0.9.23"
