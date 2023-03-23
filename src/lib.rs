@@ -15,6 +15,7 @@ pub mod vga_buffer;
 pub fn init() {
     gdt::init();
     interrupts::init_idt();
+    unsafe { interrupts::PICS.lock().initialize() };
 }
 
 #[cfg(test)]
