@@ -4,7 +4,7 @@
 #![test_runner(beeos::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
-use beeos::println;
+use beeos::{println, hlt_loop};
 use core::panic::PanicInfo;
 
 #[no_mangle]
@@ -17,14 +17,14 @@ pub extern "C" fn _start() -> ! {
     test_main();
 
     println!("no crashe");
-    loop {}
+    hlt_loop();
 }
 
 #[cfg(not(test))]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     println!("{info}");
-    loop {}
+    hlt_loop();
 }
 
 #[cfg(test)]
@@ -33,5 +33,5 @@ fn panic(info: &PanicInfo) -> ! {
     use beeos::test_panic_handler;
 
     test_panic_handler(info);
-    loop {}
+    hlt_loop();
 }
