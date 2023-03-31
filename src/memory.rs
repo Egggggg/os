@@ -35,21 +35,6 @@ unsafe fn active_level_4_table(physical_memory_offset: VirtAddr) -> &'static mut
     &mut *page_table_ptr // unsafe
 }
 
-/// Creates an example mapping for the given page to frame `0xb8000`
-pub fn create_example_mapping(page: Page, mapper: &mut OffsetPageTable, frame_allocator: &mut impl FrameAllocator<Size4KiB>) {
-    use x86_64::structures::paging::PageTableFlags as Flags;
-
-    let frame = PhysFrame::containing_address(PhysAddr::new(0xb8000));
-    let flags = Flags::PRESENT | Flags::WRITABLE;
-
-    let map_to_result = unsafe {
-        // FIXME: just for testing, not safe
-        mapper.map_to(page, frame, flags, frame_allocator)
-    };
-
-    map_to_result.expect("map_to failed").flush();
-}
-
 /// A FrameAllocator that always returns `None`
 pub struct EmptyFrameAllocator;
 
@@ -99,7 +84,7 @@ unsafe impl FrameAllocator<Size4KiB> for BootInfoFrameAllocator {
     fn allocate_frame(&mut self) -> Option<PhysFrame<Size4KiB>> {
         let frame = self.usable_frames().nth(self.next);
         self.next += 1;
-        
+
         frame
     }
 }
