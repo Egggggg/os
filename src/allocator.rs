@@ -8,8 +8,41 @@ use x86_64::{
 };
 use linked_list_allocator::LockedHeap;
 
+use self::bump::BumpAllocator;
+
+pub mod bump;
+pub mod linked_list;
+
 pub const HEAP_START: usize = 0x_4444_4444_0000;
 pub const HEAP_SIZE: usize = 100 * 1024; // 100 KiB
+
+/// A wrapper around spin::Mutex to permit trait implementations.
+pub struct Locked<A> {
+    inner: spin::Mutex<A>,
+}
+
+impl<A> Locked<A> {
+    pub const fn new(inner: A) -> Self {
+        Locked {
+            inner: spin::Mutex::new(inner),
+        }
+    }
+
+    pub fn lock(&self) -> spin::MutexGuard<A> {
+        self.inner.lock()
+    }
+}
+
+/// Align the given address `addr` upwards to alignment `align`.
+fn align_up(addr: usize, align: usize) -> usize {
+    // addr     = 42  (0b_0010_1010)
+    // align    = 16  (0b_0001_0000)
+    // 16 - 1   = 15  (0b_0000_1111)
+    // !15      = 240 (0b_1111_0000)
+    // 42 + 15  = 57  (0b_0011_1001)
+    // 57 & 240 = 48  (0b_0011_0000)
+    (addr + align - 1) & !(align - 1)
+}
 
 pub fn init_heap(
     mapper: &mut impl Mapper<Size4KiB>, 
@@ -45,4 +78,4 @@ pub fn init_heap(
 
 
 #[global_allocator]
-static ALLOCATOR: LockedHeap = LockedHeap::empty();
+static ALLOCATOR: Locked<BumpAllocator> = Locked::new(BumpAllocator::new());
