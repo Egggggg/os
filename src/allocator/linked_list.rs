@@ -58,7 +58,7 @@ impl LinkedListAllocator {
     /// Looks for a free region with the given size and alignment and removes
     /// it from the list.
     /// 
-    /// Returns a tuple of th elist node and the start address of the allocation.
+    /// Returns a tuple of the list node and the start address of the allocation.
     fn find_region(&mut self, size: usize, align: usize)
         -> Option<(&'static mut ListNode, usize)>
     {
@@ -107,6 +107,16 @@ impl LinkedListAllocator {
 
         // region suitable for allocation
         Ok(alloc_start)
+    }
+
+    fn size_align(layout: Layout) -> (usize, usize) {
+        let layout = layout
+            .align_to(mem::align_of::<ListNode>())
+            .expect("adjusting alignment failed")
+            .pad_to_align();
+        let size = layout.size().max(mem::size_of::<ListNode>());
+
+        (size, layout.align())
     }
 }
 
